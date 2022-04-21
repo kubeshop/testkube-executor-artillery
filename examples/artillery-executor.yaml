@@ -1,0 +1,9 @@
+apiVersion: executor.testkube.io/v1
+kind: Executor
+metadata:
+  name: artillery-executor
+  namespace: testkube
+spec:
+  image: kubeshop/testkube-artillery-executor:latest
+  types:
+  - artillery/test
