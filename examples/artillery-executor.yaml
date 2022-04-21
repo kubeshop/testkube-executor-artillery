@@ -4,6 +4,6 @@ metadata:
   name: artillery-executor
   namespace: testkube
 spec:
-  image: kubeshop/testkube-artillery-executor:latest
+  image: kubeshop/testkube-executor-artilleryr:latest
   types:
   - artillery/test

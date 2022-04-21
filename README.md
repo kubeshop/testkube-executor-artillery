@@ -27,7 +27,7 @@ Artillery prioritizes developer productivity and happiness, and follows the "bat
     name: artillery-executor
     namespace: testkube
   spec:
-    image: kubeshop/testkube-artillery-executor:latest
+    image: kubeshop/testkube-executor-artillery:latest
     types:
     - artillery/test
   ```

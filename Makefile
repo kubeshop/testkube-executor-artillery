@@ -1,4 +1,4 @@
-NAME ?= testkube-artillery-executor
+NAME ?= testkube-executor-artillery
 BIN_DIR ?= $(HOME)/bin
 
 build:
