@@ -8,10 +8,13 @@ import (
 	"github.com/kubeshop/testkube/pkg/api/v1/testkube"
 )
 
+// ArtilleryExecutionResult ...
 type ArtilleryExecutionResult struct {
 	Output string
 	Result ArtilleryTestResult
 }
+
+// Mapping ...
 type Mapping struct {
 	RelativeAccuracy float64 `json:"relativeAccuracy"`
 	Offset           float64 `json:"_offset"`
@@ -21,6 +24,7 @@ type Mapping struct {
 	MaxPossible      float64 `json:"maxPossible"`
 }
 
+// Store ...
 type Store struct {
 	ChunkSize float64   `json:"chunkSize"`
 	Bins      []float64 `json:"bins"`
@@ -30,6 +34,7 @@ type Store struct {
 	Offset    float64   `json:"offset"`
 }
 
+// HistogramMetrics ...
 type HistogramMetrics struct {
 	Mapping       Mapping `json:"mapping"`
 	Store         Store   `json:"store"`
@@ -41,6 +46,7 @@ type HistogramMetrics struct {
 	Sum           float64 `json:"sum"`
 }
 
+// Summary ...
 type Summary struct {
 	Min    float64 `json:"min"`
 	Max    float64 `json:"max"`
@@ -53,6 +59,8 @@ type Summary struct {
 	P99    float64 `json:"p99"`
 	P999   float64 `json:"p999"`
 }
+
+// ArtilleryTestResult ...
 type ArtilleryTestResult struct {
 	Aggregate struct {
 		Counters struct {
@@ -136,8 +144,7 @@ type ArtilleryTestResult struct {
 	} `json:"intermediate"`
 }
 
-// Validate checks if Execution has valid data in context of Cypress executor
-// Cypress executor runs currently only based on cypress project
+// Validate checks if Execution has valid data in context of Artillery executor
 func (r *ArtilleryRunner) Validate(execution testkube.Execution) error {
 
 	if execution.Content == nil {
@@ -145,7 +152,7 @@ func (r *ArtilleryRunner) Validate(execution testkube.Execution) error {
 	}
 
 	if execution.Content.Repository == nil {
-		return fmt.Errorf("cypress executor handle only repository based tests, but repository is nil")
+		return fmt.Errorf("artillery executor handle only repository based tests, but repository is nil")
 	}
 
 	if execution.Content.Repository.Path == "" {
@@ -159,6 +166,7 @@ func (r *ArtilleryRunner) Validate(execution testkube.Execution) error {
 	return nil
 }
 
+// GetArtilleryExecutionResult - fetch results from output report file
 func (r *ArtilleryRunner) GetArtilleryExecutionResult(testReportFile string, out []byte) (ArtilleryExecutionResult, error) {
 	result := ArtilleryExecutionResult{}
 	result.Output = string(out)
@@ -173,6 +181,7 @@ func (r *ArtilleryRunner) GetArtilleryExecutionResult(testReportFile string, out
 	return result, nil
 }
 
+// MapTestSummaryToResults - map test results open-api format
 func MapTestSummaryToResults(artilleryResult ArtilleryExecutionResult) testkube.ExecutionResult {
 
 	status := testkube.StatusPtr(testkube.PASSED_ExecutionStatus)
