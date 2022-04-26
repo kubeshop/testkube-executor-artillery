@@ -155,10 +155,6 @@ func (r *ArtilleryRunner) Validate(execution testkube.Execution) error {
 		return fmt.Errorf("artillery executor handle only repository based tests, but repository is nil")
 	}
 
-	if execution.Content.Repository.Path == "" {
-		return fmt.Errorf("can't find repository path in params, repo:%+v", execution.Content.Repository)
-	}
-
 	if execution.Content.Repository.Branch == "" {
 		return fmt.Errorf("can't find branch in params, repo:%+v", execution.Content.Repository)
 	}
