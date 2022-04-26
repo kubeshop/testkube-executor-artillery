@@ -60,88 +60,48 @@ type Summary struct {
 	P999   float64 `json:"p999"`
 }
 
+type Counters struct {
+	VusersCreated                               int `json:"vusers.created"`
+	HTTPRequests                                int `json:"http.requests"`
+	HTTPCodes200                                int `json:"http.codes.200"`
+	HTTPResponses                               int `json:"http.responses"`
+	PluginsExpectOk                             int `json:"plugins.expect.ok"`
+	PluginsExpectOkStatusCode                   int `json:"plugins.expect.ok.statusCode"`
+	PluginsExpectOkContentType                  int `json:"plugins.expect.ok.contentType"`
+	PluginsMetricsByEndpointGetRequestCodes200  int `json:"plugins.metrics-by-endpoint.getRequest.codes.200"`
+	VusersFailed                                int `json:"vusers.failed"`
+	VusersCompleted                             int `json:"vusers.completed"`
+	PluginsMetricsByEndpointPostRequestCodes200 int `json:"plugins.metrics-by-endpoint.postRequest.codes.200"`
+}
+type Histograms struct {
+	HTTPResponseTime                                HistogramMetrics `json:"http.response_time"`
+	PluginsMetricsByEndpointResponseTimeGetRequest  HistogramMetrics `json:"plugins.metrics-by-endpoint.response_time.getRequest"`
+	VusersSessionLength                             HistogramMetrics `json:"vusers.session_length"`
+	PluginsMetricsByEndpointResponseTimePostRequest HistogramMetrics `json:"plugins.metrics-by-endpoint.response_time.postRequest"`
+}
+type Summaries struct {
+	HTTPResponseTime                                Summary `json:"http.response_time"`
+	PluginsMetricsByEndpointResponseTimeGetRequest  Summary `json:"plugins.metrics-by-endpoint.response_time.getRequest"`
+	VusersSessionLength                             Summary `json:"vusers.session_length"`
+	PluginsMetricsByEndpointResponseTimePostRequest Summary `json:"plugins.metrics-by-endpoint.response_time.postRequest"`
+}
+type Metrics struct {
+	Counters         Counters   `json:"counters"`
+	Histograms       Histograms `json:"histograms"`
+	HTTPRequestRate  float64    `json:"http.request_rate"`
+	FirstCounterAt   float64    `json:"firstCounterAt"`
+	FirstHistogramAt float64    `json:"firstHistogramAt"`
+	LastCounterAt    float64    `json:"lastCounterAt"`
+	LastHistogramAt  float64    `json:"lastHistogramAt"`
+	FirstMetricAt    float64    `json:"firstMetricAt"`
+	LastMetricAt     float64    `json:"lastMetricAt"`
+	Summaries        Summaries  `json:"summaries"`
+}
+
 // ArtilleryTestResult ...
 type ArtilleryTestResult struct {
-	Aggregate struct {
-		Counters struct {
-			VusersCreatedByNameGetVotes                 int `json:"vusers.created_by_name.Get Votes"`
-			VusersCreated                               int `json:"vusers.created"`
-			HTTPRequests                                int `json:"http.requests"`
-			HTTPCodes200                                int `json:"http.codes.200"`
-			HTTPResponses                               int `json:"http.responses"`
-			PluginsExpectOk                             int `json:"plugins.expect.ok"`
-			PluginsExpectOkStatusCode                   int `json:"plugins.expect.ok.statusCode"`
-			PluginsExpectOkContentType                  int `json:"plugins.expect.ok.contentType"`
-			PluginsMetricsByEndpointGetRequestCodes200  int `json:"plugins.metrics-by-endpoint.getRequest.codes.200"`
-			VusersFailed                                int `json:"vusers.failed"`
-			VusersCompleted                             int `json:"vusers.completed"`
-			VusersCreatedByNamePostVotes                int `json:"vusers.created_by_name.Post Votes"`
-			PluginsMetricsByEndpointPostRequestCodes200 int `json:"plugins.metrics-by-endpoint.postRequest.codes.200"`
-		} `json:"counters"`
-		Histograms struct {
-			HTTPResponseTime                                HistogramMetrics `json:"http.response_time"`
-			PluginsMetricsByEndpointResponseTimeGetRequest  HistogramMetrics `json:"plugins.metrics-by-endpoint.response_time.getRequest"`
-			VusersSessionLength                             HistogramMetrics `json:"vusers.session_length"`
-			PluginsMetricsByEndpointResponseTimePostRequest HistogramMetrics `json:"plugins.metrics-by-endpoint.response_time.postRequest"`
-		} `json:"histograms"`
-		Rates struct {
-			HTTPRequestRate float64 `json:"http.request_rate"`
-		} `json:"rates"`
-		HTTPRequestRate  float64 `json:"http.request_rate"`
-		FirstCounterAt   float64 `json:"firstCounterAt"`
-		FirstHistogramAt float64 `json:"firstHistogramAt"`
-		LastCounterAt    float64 `json:"lastCounterAt"`
-		LastHistogramAt  float64 `json:"lastHistogramAt"`
-		FirstMetricAt    float64 `json:"firstMetricAt"`
-		LastMetricAt     float64 `json:"lastMetricAt"`
-		Period           float64 `json:"period"`
-		Summaries        struct {
-			HTTPResponseTime                                Summary `json:"http.response_time"`
-			PluginsMetricsByEndpointResponseTimeGetRequest  Summary `json:"plugins.metrics-by-endpoint.response_time.getRequest"`
-			VusersSessionLength                             Summary `json:"vusers.session_length"`
-			PluginsMetricsByEndpointResponseTimePostRequest Summary `json:"plugins.metrics-by-endpoint.response_time.postRequest"`
-		} `json:"summaries"`
-	} `json:"aggregate"`
-	Intermediate []struct {
-		Counters struct {
-			VusersCreatedByNamePostVotes                float64 `json:"vusers.created_by_name.Post Votes"`
-			VusersCreated                               float64 `json:"vusers.created"`
-			HTTPRequests                                float64 `json:"http.requests"`
-			HTTPCodes200                                float64 `json:"http.codes.200"`
-			HTTPResponses                               float64 `json:"http.responses"`
-			PluginsExpectOk                             float64 `json:"plugins.expect.ok"`
-			PluginsExpectOkStatusCode                   float64 `json:"plugins.expect.ok.statusCode"`
-			PluginsMetricsByEndpointPostRequestCodes200 float64 `json:"plugins.metrics-by-endpoint.postRequest.codes.200"`
-			VusersFailed                                float64 `json:"vusers.failed"`
-			VusersCompleted                             float64 `json:"vusers.completed"`
-			VusersCreatedByNameGetVotes                 float64 `json:"vusers.created_by_name.Get Votes"`
-			PluginsExpectOkContentType                  float64 `json:"plugins.expect.ok.contentType"`
-			PluginsMetricsByEndpointGetRequestCodes200  float64 `json:"plugins.metrics-by-endpoint.getRequest.codes.200"`
-		} `json:"counters"`
-		Histograms struct {
-			HTTPResponseTime                                HistogramMetrics `json:"http.response_time"`
-			PluginsMetricsByEndpointResponseTimePostRequest HistogramMetrics `json:"plugins.metrics-by-endpoint.response_time.postRequest"`
-			VusersSessionLength                             HistogramMetrics `json:"vusers.session_length"`
-			PluginsMetricsByEndpointResponseTimeGetRequest  HistogramMetrics `json:"plugins.metrics-by-endpoint.response_time.getRequest"`
-		} `json:"histograms"`
-		Rates struct {
-			HTTPRequestRate float64 `json:"http.request_rate"`
-		} `json:"rates"`
-		HTTPRequestRate  float64 `json:"http.request_rate"`
-		FirstCounterAt   float64 `json:"firstCounterAt"`
-		FirstHistogramAt float64 `json:"firstHistogramAt"`
-		LastCounterAt    float64 `json:"lastCounterAt"`
-		LastHistogramAt  float64 `json:"lastHistogramAt"`
-		FirstMetricAt    float64 `json:"firstMetricAt"`
-		LastMetricAt     float64 `json:"lastMetricAt"`
-		Period           string  `json:"period"`
-		Summaries        struct {
-			HTTPResponseTime                                Summary `json:"http.response_time"`
-			PluginsMetricsByEndpointResponseTimePostRequest Summary `json:"plugins.metrics-by-endpoint.response_time.postRequest"`
-			VusersSessionLength                             Summary `json:"vusers.session_length"`
-			PluginsMetricsByEndpointResponseTimeGetRequest  Summary `json:"plugins.metrics-by-endpoint.response_time.getRequest"`
-		} `json:"summaries"`
-	} `json:"intermediate"`
+	Aggregate    Metrics   `json:"aggregate"`
+	Intermediate []Metrics `json:"intermediate"`
 }
 
 // Validate checks if Execution has valid data in context of Artillery executor
