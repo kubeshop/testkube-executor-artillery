@@ -31,7 +31,7 @@ func TestRun(t *testing.T) {
 			},
 		})
 		if err != nil {
-			t.Logf("Artillery Test Failed: ResultErr: %v, Err: ", result.Err, err)
+			t.Logf("Artillery Test Failed: ResultErr: %v, Err: ", result.ErrorMessage, err)
 		}
 		// then
 		assert.NoError(t, err)
