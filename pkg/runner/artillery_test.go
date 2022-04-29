@@ -30,7 +30,9 @@ func TestRun(t *testing.T) {
 				},
 			},
 		})
-
+		if err != nil {
+			t.Logf("Artillery Test Failed: ResultErr: %v, Err: ", result.Err, err)
+		}
 		// then
 		assert.NoError(t, err)
 		assert.Equal(t, result.Status, testkube.PASSED_ExecutionStatus)
