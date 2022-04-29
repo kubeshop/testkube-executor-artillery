@@ -15,7 +15,7 @@ func TestRun(t *testing.T) {
 		// install artillery before running test
 		_, err := executor.Run("", "npm", "install", "-g", "artillery@latest")
 		if err != nil {
-			t.Errorf("npm install artillery error: %w", err)
+			t.Errorf("npm install artillery error: %v", err)
 		}
 		runner := NewArtilleryRunner()
 		repoURI := "https://github.com/kubeshop/testkube-executor-artillery.git"
@@ -31,7 +31,7 @@ func TestRun(t *testing.T) {
 			},
 		})
 		if err != nil {
-			t.Logf("Artillery Test Failed: ResultErr: %v, Err: ", result.ErrorMessage, err)
+			t.Errorf("Artillery Test Failed: ResultErr: %v, Err: %v ", result.ErrorMessage, err)
 		}
 		// then
 		assert.NoError(t, err)
