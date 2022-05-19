@@ -5,11 +5,12 @@ import (
 	"path/filepath"
 
 	"github.com/kelseyhightower/envconfig"
+
 	"github.com/kubeshop/testkube/pkg/api/v1/testkube"
 	"github.com/kubeshop/testkube/pkg/executor"
 	"github.com/kubeshop/testkube/pkg/executor/content"
 	"github.com/kubeshop/testkube/pkg/executor/output"
-	"github.com/kubeshop/testkube/pkg/executor/scrapper"
+	"github.com/kubeshop/testkube/pkg/executor/scraper"
 )
 
 // Params ...
@@ -35,7 +36,7 @@ func NewArtilleryRunner() *ArtilleryRunner {
 	return &ArtilleryRunner{
 		Fetcher: content.NewFetcher(""),
 		Params:  params,
-		Scrapper: scrapper.NewScrapper(
+		Scraper: scraper.NewMinioScraper(
 			params.Endpoint,
 			params.AccessKeyID,
 			params.SecretAccessKey,
@@ -48,9 +49,9 @@ func NewArtilleryRunner() *ArtilleryRunner {
 
 // ArtilleryRunner ...
 type ArtilleryRunner struct {
-	Params   Params
-	Fetcher  content.ContentFetcher
-	Scrapper *scrapper.Scrapper
+	Params  Params
+	Fetcher content.ContentFetcher
+	Scraper scraper.Scraper
 }
 
 // Run ...
@@ -73,14 +74,10 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 
 	output.PrintEvent("created content path", path)
 
-	params := make([]string, 0, len(execution.Params))
-	for key, value := range execution.Params {
-		params = append(params, fmt.Sprintf("%s=%s", key, value))
-	}
 	testDir, _ := filepath.Split(path)
 	args := []string{"run", path}
-	if len(params) != 0 {
-		args = append(args, params...)
+	for _, v := range execution.Variables {
+		args = append(args, fmt.Sprintf("%s=%s", v.Name, v.Value))
 	}
 	// artillery test result output file
 	testReportFile := filepath.Join(testDir, "test-report.json")
@@ -100,11 +97,11 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 
 	result = MapTestSummaryToResults(artilleryResult)
 
-	if r.Params.ScrapperEnabled && r.Scrapper != nil {
+	if r.Params.ScrapperEnabled && r.Scraper != nil {
 		artifacts := []string{
 			testReportFile,
 		}
-		err = r.Scrapper.Scrape(execution.Id, artifacts)
+		err = r.Scraper.Scrape(execution.Id, artifacts)
 		if err != nil {
 			return result.WithErrors(fmt.Errorf("scrape artifacts error: %w", err)), nil
 		}
