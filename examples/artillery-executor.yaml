@@ -6,4 +6,9 @@ metadata:
 spec:
   image: kubeshop/testkube-executor-artilleryr:latest
   types:
-  - artillery/test
+    - artillery/test
+  content_types:
+    - git-file
+    - git-dir
+    - string
+    - uri-file
