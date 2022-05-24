@@ -24,11 +24,11 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Docker meta for Template executor
+      - name: Docker meta for Artillery executor
         id: meta_artillery_executor
         uses: docker/metadata-action@v3
         with:
-          images: kubeshop/testkube-template-executor
+          images: kubeshop/testkube-artillery-executor
           tags: |
             type=ref,event=branch
             type=ref,event=pr
