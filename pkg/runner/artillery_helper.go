@@ -111,14 +111,6 @@ func (r *ArtilleryRunner) Validate(execution testkube.Execution) error {
 		return fmt.Errorf("can't find any content to run in execution data: %+v", execution)
 	}
 
-	if execution.Content.Repository == nil {
-		return fmt.Errorf("artillery executor handle only repository based tests, but repository is nil")
-	}
-
-	if execution.Content.Repository.Branch == "" {
-		return fmt.Errorf("can't find branch in params, repo:%+v", execution.Content.Repository)
-	}
-
 	return nil
 }
 
