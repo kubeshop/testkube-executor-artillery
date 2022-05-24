@@ -1,5 +1,5 @@
 config:
-  target: "http://testkube-api-server:8088/health"
+  target: "http://testkube-api-server:8088"
   phases:
     - duration: 60
       arrivalRate: 5
@@ -11,3 +11,8 @@ config:
     - duration: 600
       arrivalRate: 50
       name: Sustained load
+scenarios:
+  - name: "Check health endpoint"
+    flow:
+      - get:
+          url: "/health"
