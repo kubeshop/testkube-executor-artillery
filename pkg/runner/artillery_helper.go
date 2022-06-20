@@ -3,7 +3,7 @@ package runner
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/kubeshop/testkube/pkg/api/v1/testkube"
 )
@@ -118,7 +118,7 @@ func (r *ArtilleryRunner) Validate(execution testkube.Execution) error {
 func (r *ArtilleryRunner) GetArtilleryExecutionResult(testReportFile string, out []byte) (ArtilleryExecutionResult, error) {
 	result := ArtilleryExecutionResult{}
 	result.Output = string(out)
-	data, err := ioutil.ReadFile(testReportFile)
+	data, err := os.ReadFile(testReportFile)
 	if err != nil {
 		return result, err
 	}
