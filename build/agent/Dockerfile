@@ -13,4 +13,5 @@ RUN npm install -g artillery@latest
 WORKDIR /root/
 COPY --from=0 /runner /bin/runner
 EXPOSE 8082
+
 ENTRYPOINT ["/bin/runner"]
