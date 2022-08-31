@@ -11,6 +11,7 @@ import (
 	"github.com/kubeshop/testkube/pkg/executor/content"
 	"github.com/kubeshop/testkube/pkg/executor/output"
 	"github.com/kubeshop/testkube/pkg/executor/scraper"
+	"github.com/kubeshop/testkube/pkg/executor/secret"
 )
 
 // Params ...
@@ -76,6 +77,7 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 
 	testDir, _ := filepath.Split(path)
 	args := []string{"run", path}
+	secret.NewEnvManager().GetVars(execution.Variables)
 	for _, v := range execution.Variables {
 		args = append(args, fmt.Sprintf("%s=%s", v.Name, v.Value))
 	}
