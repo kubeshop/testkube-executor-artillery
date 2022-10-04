@@ -83,7 +83,8 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 
 	testDir, _ := filepath.Split(path)
 	args := []string{"run", path}
-	secret.NewEnvManager().GetVars(execution.Variables)
+	envManager := secret.NewEnvManagerWithVars(execution.Variables)
+	envManager.GetVars(execution.Variables)
 	for _, v := range execution.Variables {
 		args = append(args, fmt.Sprintf("%s=%s", v.Name, v.Value))
 	}
@@ -95,7 +96,9 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 
 	args = append(args, execution.Args...)
 	// run executor here
-	out, rerr := executor.Run(testDir, "artillery", args...)
+	out, rerr := executor.Run(testDir, "artillery", envManager, args...)
+
+	out = envManager.Obfuscate(out)
 
 	var artilleryResult ArtilleryExecutionResult
 	artilleryResult, err = r.GetArtilleryExecutionResult(testReportFile, out)
