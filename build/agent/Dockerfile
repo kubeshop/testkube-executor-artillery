@@ -8,12 +8,14 @@ ENV GOOS=linux
 RUN cd cmd/agent;go build -o /runner -mod mod -a .
 
 FROM node:17
-RUN apt-get update && apt-get install -y git
-RUN npm install -g artillery@latest
-WORKDIR /root/
+
+RUN apt-get update && apt-get install -y git && \
+    npm install -g artillery@latest && \
+    useradd -m -d /home/artillery -s /bin/bash -u 1001 -r -g root artillery
+USER 1001
+
 COPY --from=0 /runner /bin/runner
 EXPOSE 8082
-
-USER 1001
+WORKDIR /home/artillery
 
 ENTRYPOINT ["/bin/runner"]
