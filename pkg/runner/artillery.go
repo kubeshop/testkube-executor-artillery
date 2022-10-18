@@ -75,12 +75,6 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 
 	output.PrintEvent("created content path", path)
 
-	// add configuration files
-	err = content.PlaceFiles(execution.CopyFiles)
-	if err != nil {
-		return result.Err(fmt.Errorf("could not place config files: %w", err)), nil
-	}
-
 	testDir, _ := filepath.Split(path)
 	args := []string{"run", path}
 	envManager := secret.NewEnvManagerWithVars(execution.Variables)
