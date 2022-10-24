@@ -25,6 +25,7 @@ type Params struct {
 	ScrapperEnabled bool   // RUNNER_SCRAPPERENABLED
 	GitUsername     string // RUNNER_GITUSERNAME
 	GitToken        string // RUNNER_GITTOKEN
+	DataDir         string // RUNNER_DATADIR
 }
 
 // NewArtilleryRunner ...
@@ -89,8 +90,14 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 	args = append(args, "-o", testReportFile)
 
 	args = append(args, execution.Args...)
+
+	runPath := testDir
+	if execution.Content.Repository != nil && execution.Content.Repository.WorkingDir != "" {
+		runPath = filepath.Join(r.Params.DataDir, "repo", execution.Content.Repository.WorkingDir)
+	}
+
 	// run executor here
-	out, rerr := executor.Run(testDir, "artillery", envManager, args...)
+	out, rerr := executor.Run(runPath, "artillery", envManager, args...)
 
 	out = envManager.Obfuscate(out)
 
