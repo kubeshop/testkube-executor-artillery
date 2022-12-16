@@ -10,6 +10,7 @@ import (
 	"github.com/kubeshop/testkube/pkg/executor"
 	"github.com/kubeshop/testkube/pkg/executor/content"
 	"github.com/kubeshop/testkube/pkg/executor/output"
+	"github.com/kubeshop/testkube/pkg/executor/runner"
 	"github.com/kubeshop/testkube/pkg/executor/scraper"
 	"github.com/kubeshop/testkube/pkg/executor/secret"
 )
@@ -63,7 +64,7 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 	if err != nil {
 		return result, err
 	}
-	if r.Params.GitUsername != "" && r.Params.GitToken != "" {
+	if r.Params.GitUsername != "" || r.Params.GitToken != "" {
 		if execution.Content != nil && execution.Content.Repository != nil {
 			execution.Content.Repository.Username = r.Params.GitUsername
 			execution.Content.Repository.Token = r.Params.GitToken
@@ -121,4 +122,9 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 
 	// return ExecutionResult
 	return result.WithErrors(err), nil
+}
+
+// GetType returns runner type
+func (r *ArtilleryRunner) GetType() runner.Type {
+	return runner.TypeMain
 }
