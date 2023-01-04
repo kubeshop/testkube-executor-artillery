@@ -80,8 +80,8 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 	testDir, _ := filepath.Split(path)
 	args := []string{"run", path}
 	envManager := secret.NewEnvManagerWithVars(execution.Variables)
-	envManager.GetVars(execution.Variables)
-	for _, v := range execution.Variables {
+	envManager.GetVars(envManager.Variables)
+	for _, v := range envManager.Variables {
 		args = append(args, fmt.Sprintf("%s=%s", v.Name, v.Value))
 	}
 	// artillery test result output file
