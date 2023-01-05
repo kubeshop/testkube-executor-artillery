@@ -3,6 +3,7 @@ package runner
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/kelseyhightower/envconfig"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/kubeshop/testkube/pkg/executor/runner"
 	"github.com/kubeshop/testkube/pkg/executor/scraper"
 	"github.com/kubeshop/testkube/pkg/executor/secret"
+	"github.com/kubeshop/testkube/pkg/ui"
 )
 
 // Params ...
@@ -31,11 +33,17 @@ type Params struct {
 
 // NewArtilleryRunner ...
 func NewArtilleryRunner() *ArtilleryRunner {
+	output.PrintEvent(fmt.Sprintf("%s Preparing test runner", ui.IconTruck))
 	var params Params
+
+	output.PrintEvent(fmt.Sprintf("%s Reading environment variables...", ui.IconWorld))
 	err := envconfig.Process("runner", &params)
 	if err != nil {
 		panic(err.Error())
 	}
+	output.PrintEvent(fmt.Sprintf("%s Environment variables read successfully", ui.IconCheckMark))
+	printParams(params)
+
 	return &ArtilleryRunner{
 		Fetcher: content.NewFetcher(""),
 		Params:  params,
@@ -59,6 +67,7 @@ type ArtilleryRunner struct {
 
 // Run ...
 func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.ExecutionResult, err error) {
+	output.PrintEvent(fmt.Sprintf("%s Preparing for test run", ui.IconTruck))
 	// make some validation
 	err = r.Validate(execution)
 	if err != nil {
@@ -70,12 +79,13 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 			execution.Content.Repository.Token = r.Params.GitToken
 		}
 	}
+
+	output.PrintEvent(fmt.Sprintf("%s Fetching test content from %s...", ui.IconBox, execution.Content.Type_))
 	path, err := r.Fetcher.Fetch(execution.Content)
 	if err != nil {
-		return result, err
+		return result, fmt.Errorf("could not fetch test content: %w", err)
 	}
-
-	output.PrintEvent("created content path", path)
+	output.PrintEvent(fmt.Sprintf("%s Test content fetched to path %s", ui.IconCheckMark, path))
 
 	testDir, _ := filepath.Split(path)
 	args := []string{"run", path}
@@ -97,7 +107,8 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 		runPath = filepath.Join(r.Params.DataDir, "repo", execution.Content.Repository.WorkingDir)
 	}
 
-	// run executor here
+	// run executor
+	output.PrintEvent(fmt.Sprintf("%s executing test\n\t$ artillery %s", ui.IconMicroscope, strings.Join(args, " ")))
 	out, rerr := executor.Run(runPath, "artillery", envManager, args...)
 
 	out = envManager.Obfuscate(out)
@@ -107,6 +118,11 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 	if err != nil {
 		return result.WithErrors(rerr, fmt.Errorf("failed to get test execution results")), err
 	}
+	if err == nil && rerr == nil {
+		output.PrintEvent(fmt.Sprintf("%s Test run succeeded", ui.IconCheckMark))
+	} else {
+		output.PrintEvent(fmt.Sprintf("%s Test run failed: \n %s \n %s", ui.IconCross, err.Error(), rerr.Error()))
+	}
 
 	result = MapTestSummaryToResults(artilleryResult)
 
@@ -114,10 +130,13 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 		artifacts := []string{
 			testReportFile,
 		}
+		output.PrintEvent(fmt.Sprintf("%s Scraping artifacts %s", ui.IconCabinet, artifacts))
 		err = r.Scraper.Scrape(execution.Id, artifacts)
 		if err != nil {
+			output.PrintEvent(fmt.Sprintf("%s Failed to scrape artifacts: %s", ui.IconCross, err.Error()))
 			return result.WithErrors(fmt.Errorf("scrape artifacts error: %w", err)), nil
 		}
+		output.PrintEvent(fmt.Sprintf("%s Successfully scraped artifacts", ui.IconCheckMark))
 	}
 
 	// return ExecutionResult
@@ -127,4 +146,27 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 // GetType returns runner type
 func (r *ArtilleryRunner) GetType() runner.Type {
 	return runner.TypeMain
+}
+
+// printParams shows the read parameters in logs
+func printParams(params Params) {
+	output.PrintLog(fmt.Sprintf("RUNNER_ENDPOINT=\"%s\"", params.Endpoint))
+	printSensitiveParam("RUNNER_ACCESSKEYID", params.AccessKeyID)
+	printSensitiveParam("RUNNER_SECRETACCESSKEY", params.SecretAccessKey)
+	output.PrintLog(fmt.Sprintf("RUNNER_LOCATION=\"%s\"", params.Location))
+	printSensitiveParam("RUNNER_TOKEN", params.Token)
+	output.PrintLog(fmt.Sprintf("RUNNER_SSL=%t", params.Ssl))
+	output.PrintLog(fmt.Sprintf("RUNNER_SCRAPPERENABLED=\"%t\"", params.ScrapperEnabled))
+	output.PrintLog(fmt.Sprintf("RUNNER_GITUSERNAME=\"%s\"", params.GitUsername))
+	printSensitiveParam("RUNNER_GITTOKEN", params.GitToken)
+	output.PrintLog(fmt.Sprintf("RUNNER_DATADIR=\"%s\"", params.DataDir))
+}
+
+// printSensitiveParam shows in logs if a parameter is set or not
+func printSensitiveParam(name string, value string) {
+	if len(value) == 0 {
+		output.PrintLog(fmt.Sprintf("%s=\"\"", name))
+	} else {
+		output.PrintLog(fmt.Sprintf("%s=\"********\"", name))
+	}
 }
