@@ -2,7 +2,6 @@ package runner
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -145,7 +144,7 @@ func CreateEnvFile(vars map[string]testkube.Variable) (*os.File, error) {
 	for _, v := range vars {
 		envVars = append(envVars, []byte(fmt.Sprintf("%s=%s\n", v.Name, v.Value))...)
 	}
-	envFile, err := ioutil.TempFile("/tmp", "")
+	envFile, err := os.CreateTemp("/tmp", "")
 	if err != nil {
 		return nil, fmt.Errorf("could not create dotenv file: %w", err)
 	}
