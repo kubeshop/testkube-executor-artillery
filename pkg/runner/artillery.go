@@ -2,7 +2,6 @@ package runner
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -89,10 +88,10 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 		if err != nil {
 			return result, err
 		}
-		defer envFile.Close()
-		defer os.Remove(envFile.Name())
-		args = append(args, "--dotenv", envFile.Name())
-		output.PrintEvent("created dotenv file", envFile.Name())
+
+		defer os.Remove(envFile)
+		args = append(args, "--dotenv", envFile)
+		output.PrintEvent("created dotenv file", envFile)
 	}
 
 	// artillery test result output file
@@ -140,19 +139,20 @@ func (r *ArtilleryRunner) GetType() runner.Type {
 	return runner.TypeMain
 }
 
-func CreateEnvFile(vars map[string]testkube.Variable) (*os.File, error) {
+func CreateEnvFile(vars map[string]testkube.Variable) (string, error) {
 	envVars := []byte{}
 	for _, v := range vars {
 		envVars = append(envVars, []byte(fmt.Sprintf("%s=%s\n", v.Name, v.Value))...)
 	}
-	envFile, err := ioutil.TempFile("/tmp", "")
+	envFile, err := os.CreateTemp("/tmp", "")
 	if err != nil {
-		return nil, fmt.Errorf("could not create dotenv file: %w", err)
+		return "", fmt.Errorf("could not create dotenv file: %w", err)
 	}
+	defer envFile.Close()
 
 	if _, err := envFile.Write(envVars); err != nil {
-		return nil, fmt.Errorf("could not write dotenv file: %w", err)
+		return "", fmt.Errorf("could not write dotenv file: %w", err)
 	}
 
-	return envFile, nil
+	return envFile.Name(), nil
 }
