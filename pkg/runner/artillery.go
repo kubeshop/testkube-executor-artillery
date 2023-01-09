@@ -2,6 +2,8 @@ package runner
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/kelseyhightower/envconfig"
@@ -81,9 +83,18 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 	args := []string{"run", path}
 	envManager := secret.NewEnvManagerWithVars(execution.Variables)
 	envManager.GetVars(envManager.Variables)
-	for _, v := range envManager.Variables {
-		args = append(args, fmt.Sprintf("%s=%s", v.Name, v.Value))
+
+	if len(envManager.Variables) != 0 {
+		envFile, err := CreateEnvFile(envManager.Variables)
+		if err != nil {
+			return result, err
+		}
+		defer envFile.Close()
+		defer os.Remove(envFile.Name())
+		args = append(args, "--dotenv", envFile.Name())
+		output.PrintEvent("created dotenv file", envFile.Name())
 	}
+
 	// artillery test result output file
 	testReportFile := filepath.Join(testDir, "test-report.json")
 
@@ -127,4 +138,21 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 // GetType returns runner type
 func (r *ArtilleryRunner) GetType() runner.Type {
 	return runner.TypeMain
+}
+
+func CreateEnvFile(vars map[string]testkube.Variable) (*os.File, error) {
+	envVars := []byte{}
+	for _, v := range vars {
+		envVars = append(envVars, []byte(fmt.Sprintf("%s=%s\n", v.Name, v.Value))...)
+	}
+	envFile, err := ioutil.TempFile("/tmp", "")
+	if err != nil {
+		return nil, fmt.Errorf("could not create dotenv file: %w", err)
+	}
+
+	if _, err := envFile.Write(envVars); err != nil {
+		return nil, fmt.Errorf("could not write dotenv file: %w", err)
+	}
+
+	return envFile, nil
 }
