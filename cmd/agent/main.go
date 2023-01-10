@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/kubeshop/testkube-executor-artillery/pkg/runner"
@@ -8,5 +9,9 @@ import (
 )
 
 func main() {
-	agent.Run(runner.NewArtilleryRunner(), os.Args)
+	r, err := runner.NewArtilleryRunner()
+	if err != nil {
+		panic(fmt.Errorf("could not run artillery tests: %w", err))
+	}
+	agent.Run(r, os.Args)
 }
