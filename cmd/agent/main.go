@@ -12,7 +12,7 @@ import (
 func main() {
 	r, err := runner.NewArtilleryRunner()
 	if err != nil {
-		log.Fatalf("%s could not run artillery tests: %w", ui.IconCross, err)
+		log.Fatalf("%s could not run artillery tests: %s", ui.IconCross, err.Error())
 	}
 	agent.Run(r, os.Args)
 }
