@@ -3,7 +3,7 @@ module github.com/kubeshop/testkube-executor-artillery
 go 1.18
 
 require (
-	github.com/kubeshop/testkube v1.8.17-0.20230110143037-d9256136a9fe
+	github.com/kubeshop/testkube v1.8.21
 	github.com/stretchr/testify v1.8.1
 )
 

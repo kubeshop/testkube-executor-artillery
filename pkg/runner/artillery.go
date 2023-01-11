@@ -17,10 +17,10 @@ import (
 
 // NewArtilleryRunner creates a new Testkube test runner for Artillery tests
 func NewArtilleryRunner() (*ArtilleryRunner, error) {
-	output.PrintEvent(fmt.Sprintf("%s Preparing test runner", ui.IconTruck))
+	output.PrintLog(fmt.Sprintf("%s Preparing test runner", ui.IconTruck))
 	params, err := envs.LoadTestkubeVariables()
 	if err != nil {
-		return nil, fmt.Errorf("could not initialize Artillery Runner: %w", err)
+		return nil, fmt.Errorf("could not initialize Artillery runner variables: %w", err)
 	}
 
 	return &ArtilleryRunner{
@@ -46,7 +46,7 @@ type ArtilleryRunner struct {
 
 // Run ...
 func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.ExecutionResult, err error) {
-	output.PrintEvent(fmt.Sprintf("%s Preparing for test run", ui.IconTruck))
+	output.PrintLog(fmt.Sprintf("%s Preparing for test run", ui.IconTruck))
 	// make some validation
 	err = r.Validate(execution)
 	if err != nil {
@@ -96,6 +96,7 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 	}
 
 	result = MapTestSummaryToResults(artilleryResult)
+	output.PrintLog(fmt.Sprintf("%s Mapped test summary to Execution Results...", ui.IconCheckMark))
 
 	if r.Params.ScrapperEnabled && r.Scraper != nil {
 		artifacts := []string{
