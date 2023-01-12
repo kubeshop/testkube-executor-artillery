@@ -5,38 +5,25 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/kelseyhightower/envconfig"
-
 	"github.com/kubeshop/testkube/pkg/api/v1/testkube"
+	"github.com/kubeshop/testkube/pkg/envs"
 	"github.com/kubeshop/testkube/pkg/executor"
 	"github.com/kubeshop/testkube/pkg/executor/content"
 	"github.com/kubeshop/testkube/pkg/executor/output"
 	"github.com/kubeshop/testkube/pkg/executor/runner"
 	"github.com/kubeshop/testkube/pkg/executor/scraper"
 	"github.com/kubeshop/testkube/pkg/executor/secret"
+	"github.com/kubeshop/testkube/pkg/ui"
 )
 
-// Params ...
-type Params struct {
-	Endpoint        string // RUNNER_ENDPOINT
-	AccessKeyID     string // RUNNER_ACCESSKEYID
-	SecretAccessKey string // RUNNER_SECRETACCESSKEY
-	Location        string // RUNNER_LOCATION
-	Token           string // RUNNER_TOKEN
-	Ssl             bool   // RUNNER_SSL
-	ScrapperEnabled bool   // RUNNER_SCRAPPERENABLED
-	GitUsername     string // RUNNER_GITUSERNAME
-	GitToken        string // RUNNER_GITTOKEN
-	DataDir         string // RUNNER_DATADIR
-}
-
-// NewArtilleryRunner ...
-func NewArtilleryRunner() *ArtilleryRunner {
-	var params Params
-	err := envconfig.Process("runner", &params)
+// NewArtilleryRunner creates a new Testkube test runner for Artillery tests
+func NewArtilleryRunner() (*ArtilleryRunner, error) {
+	output.PrintLog(fmt.Sprintf("%s Preparing test runner", ui.IconTruck))
+	params, err := envs.LoadTestkubeVariables()
 	if err != nil {
-		panic(err.Error())
+		return nil, fmt.Errorf("could not initialize Artillery runner variables: %w", err)
 	}
+
 	return &ArtilleryRunner{
 		Fetcher: content.NewFetcher(""),
 		Params:  params,
@@ -48,18 +35,19 @@ func NewArtilleryRunner() *ArtilleryRunner {
 			params.Token,
 			params.Ssl,
 		),
-	}
+	}, err
 }
 
 // ArtilleryRunner ...
 type ArtilleryRunner struct {
-	Params  Params
+	Params  envs.Params
 	Fetcher content.ContentFetcher
 	Scraper scraper.Scraper
 }
 
 // Run ...
 func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.ExecutionResult, err error) {
+	output.PrintLog(fmt.Sprintf("%s Preparing for test run", ui.IconTruck))
 	// make some validation
 	err = r.Validate(execution)
 	if err != nil {
@@ -71,12 +59,11 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 			execution.Content.Repository.Token = r.Params.GitToken
 		}
 	}
+
 	path, err := r.Fetcher.Fetch(execution.Content)
 	if err != nil {
-		return result, err
+		return result, fmt.Errorf("could not fetch test content: %w", err)
 	}
-
-	output.PrintEvent("created content path", path)
 
 	testDir, _ := filepath.Split(path)
 	args := []string{"run", path}
@@ -107,7 +94,7 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 		runPath = filepath.Join(r.Params.DataDir, "repo", execution.Content.Repository.WorkingDir)
 	}
 
-	// run executor here
+	// run executor
 	out, rerr := executor.Run(runPath, "artillery", envManager, args...)
 
 	out = envManager.Obfuscate(out)
@@ -119,6 +106,7 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 	}
 
 	result = MapTestSummaryToResults(artilleryResult)
+	output.PrintLog(fmt.Sprintf("%s Mapped test summary to Execution Results...", ui.IconCheckMark))
 
 	if r.Params.ScrapperEnabled && r.Scraper != nil {
 		artifacts := []string{
