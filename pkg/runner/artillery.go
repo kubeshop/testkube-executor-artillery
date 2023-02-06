@@ -33,6 +33,7 @@ func NewArtilleryRunner() (*ArtilleryRunner, error) {
 			params.SecretAccessKey,
 			params.Location,
 			params.Token,
+			params.Bucket,
 			params.Ssl,
 		),
 	}, err
@@ -102,7 +103,7 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 	var artilleryResult ArtilleryExecutionResult
 	artilleryResult, err = r.GetArtilleryExecutionResult(testReportFile, out)
 	if err != nil {
-		return result.WithErrors(rerr, fmt.Errorf("failed to get test execution results")), err
+		return *result.WithErrors(rerr, fmt.Errorf("failed to get test execution results")), err
 	}
 
 	result = MapTestSummaryToResults(artilleryResult)
@@ -114,12 +115,12 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 		}
 		err = r.Scraper.Scrape(execution.Id, artifacts)
 		if err != nil {
-			return result.WithErrors(fmt.Errorf("scrape artifacts error: %w", err)), nil
+			return *result.WithErrors(fmt.Errorf("scrape artifacts error: %w", err)), nil
 		}
 	}
 
 	// return ExecutionResult
-	return result.WithErrors(err), nil
+	return *result.WithErrors(err), nil
 }
 
 // GetType returns runner type
