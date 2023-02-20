@@ -19,7 +19,7 @@ install-swagger-codegen-mac:
 	brew install swagger-codegen
 
 install-artillery:
-	npm install -g artillery@latest
+	npm install -g artillery@2.0.0-27
 	
 test: 
 	go test ./... -cover
