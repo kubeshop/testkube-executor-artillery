@@ -15,7 +15,7 @@ func TestRun(t *testing.T) {
 	t.Run("runner should run test based on execution data", func(t *testing.T) {
 		// given
 		// install artillery before running test
-		_, err := executor.Run("", "npm", "install", "-g", "artillery@latest")
+		_, err := executor.Run("", "npm", "install", "-g", "artillery@2.0.0-27")
 		if err != nil {
 			t.Errorf("npm install artillery error: %v", err)
 		}
