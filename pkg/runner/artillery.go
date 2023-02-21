@@ -9,10 +9,10 @@ import (
 	"github.com/kubeshop/testkube/pkg/envs"
 	"github.com/kubeshop/testkube/pkg/executor"
 	"github.com/kubeshop/testkube/pkg/executor/content"
+	"github.com/kubeshop/testkube/pkg/executor/env"
 	"github.com/kubeshop/testkube/pkg/executor/output"
 	"github.com/kubeshop/testkube/pkg/executor/runner"
 	"github.com/kubeshop/testkube/pkg/executor/scraper"
-	"github.com/kubeshop/testkube/pkg/executor/secret"
 	"github.com/kubeshop/testkube/pkg/ui"
 )
 
@@ -68,8 +68,8 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 
 	testDir, _ := filepath.Split(path)
 	args := []string{"run", path}
-	envManager := secret.NewEnvManagerWithVars(execution.Variables)
-	envManager.GetVars(envManager.Variables)
+	envManager := env.NewManagerWithVars(execution.Variables)
+	envManager.GetReferenceVars(envManager.Variables)
 
 	if len(envManager.Variables) != 0 {
 		envFile, err := CreateEnvFile(envManager.Variables)
@@ -98,7 +98,7 @@ func (r *ArtilleryRunner) Run(execution testkube.Execution) (result testkube.Exe
 	// run executor
 	out, rerr := executor.Run(runPath, "artillery", envManager, args...)
 
-	out = envManager.Obfuscate(out)
+	out = envManager.ObfuscateSecrets(out)
 
 	var artilleryResult ArtilleryExecutionResult
 	artilleryResult, err = r.GetArtilleryExecutionResult(testReportFile, out)
