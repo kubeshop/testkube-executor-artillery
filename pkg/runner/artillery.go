@@ -25,7 +25,7 @@ func NewArtilleryRunner() (*ArtilleryRunner, error) {
 	}
 
 	return &ArtilleryRunner{
-		Fetcher: content.NewFetcher(""),
+		Fetcher: content.NewFetcher(params.DataDir),
 		Params:  params,
 		Scraper: scraper.NewMinioScraper(
 			params.Endpoint,
